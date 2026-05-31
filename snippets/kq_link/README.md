@@ -1,5 +1,3 @@
-1.25.0
-
 ### Inventory Setup
 
 To use **one_inventory** with **kq_link**, follow these steps:
