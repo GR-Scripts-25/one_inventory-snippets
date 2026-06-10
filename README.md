@@ -26,6 +26,7 @@ See the repository license for details.
 | `nass_lib` | 🔴 Needs Testing |
 | `vms_housing` | 🟢 Tested & Working |
 | `wasabi_bridge` | 🔴 Needs Testing |
+| `vms_bossmenu` | 🟢 Tested & Working |
 
 ## ⚠️ Disclaimer
 
