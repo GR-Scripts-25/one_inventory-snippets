@@ -1,11 +1,13 @@
-To use **one_inventory** with **kq_link**, follow these steps:
+Switching to one_inventory with kq_link
+To use one_inventory as your inventory system with kq_link, follow these steps:
 
-1. Navigate to the following directory: `kq_link\links\inventories`
+Remove the old kq_link – Delete the existing kq_link folder from your resources directory.
 
-2. Place the **one_inventory** bridge file/folder inside the `inventories` directory.
+Download and install the new kq_link – Place the new version into your resources folder.
 
-3. Save the file and restart the resource.
+Save your changes and restart the resource.
 
-**kq_link** will now use **one_inventory** as its inventory system.
+kq_link will now use one_inventory as its inventory system.
+
 
 script by **kuzquality**: https://kuzquality.com/
