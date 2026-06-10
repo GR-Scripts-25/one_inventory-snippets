@@ -25,6 +25,7 @@ See the repository license for details.
 | `nass_lib` | 🔴 Needs Testing |
 | `wasabi_bridge` | 🔴 Needs Testing |
 | `jim-bridge` | 🟢 Tested & Working |
+| `vms_housing` | 🟢 Tested & Working |
 
 ## ⚠️ Disclaimer
 
