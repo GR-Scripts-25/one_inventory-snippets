@@ -20,6 +20,7 @@ local Exports = {
     OrigenInv = "origen_inventory",
     TgiannInv = "tgiann-inventory",
     JPRInv = "jpr-inventory",
+    OneInv = "one_inventory",
 
     OXLibExport = "ox_lib",
 
