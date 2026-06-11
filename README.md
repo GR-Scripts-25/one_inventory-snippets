@@ -17,16 +17,16 @@ See the repository license for details.
 | Resource | Status | Version
 |----------|--------|--------|
 | `cdev_lib` | 🔴 Needs Testing |
-| `devhub_lib` | 🔴 Needs Testing |
+| `devhub_lib` | 🔴 Needs Testing | 3.0.4
 | `gg_busjob` | 🟢 Tested & Working |
 | `jim-bridge` | 🟢 Tested & Working | 2.1.09
 | `kq_link` | 🟢 Tested & Working | 1.25.1
-| `lation_shops` | 🟢 Tested & Working |
-| `lb-phone` | 🟢 Tested & Working |
+| `lation_shops` | 🟢 Tested & Working | 1.5.0
+| `lb-phone` | 🟢 Tested & Working | 2.8.0
 | `nass_lib` | 🔴 Needs Testing |
-| `vms_housing` | 🟢 Tested & Working |
+| `vms_housing` | 🟢 Tested & Working | 1.4.3
 | `wasabi_bridge` | 🔴 Needs Testing |
-| `vms_bossmenu` | 🟢 Tested & Working |
+| `vms_bossmenu` | 🟢 Tested & Working | '1.0.6
 | `okokshop` | 🟢 Tested & Working |
 | `kartik_mdtV2` | 🟢 Tested & Working | beta v2.0.4
 
