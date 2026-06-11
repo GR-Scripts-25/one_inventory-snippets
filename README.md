@@ -19,7 +19,7 @@ See the repository license for details.
 | `cdev_lib` | 🔴 Needs Testing |
 | `devhub_lib` | 🔴 Needs Testing |
 | `gg_busjob` | 🟢 Tested & Working |
-| `jim-bridge` | 🟢 Tested & Working |
+| `jim-bridge` | 🟢 Tested & Working | 2.1.09
 | `kq_link` | 🟢 Tested & Working |
 | `lation_shops` | 🟢 Tested & Working |
 | `lb-phone` | 🟢 Tested & Working |
