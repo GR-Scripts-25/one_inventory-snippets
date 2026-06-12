@@ -29,6 +29,7 @@ See the repository license for details.
 | `vms_bossmenu` | 🟢 Tested & Working | '1.0.6
 | `okokshop` | 🟢 Tested & Working |
 | `kartik_mdtV2` | 🟢 Tested & Working | beta v2.0.4
+| `17mov_Phone` | 🟢 Tested & Working | 1.2.3
 
 ## ⚠️ Disclaimer
 
