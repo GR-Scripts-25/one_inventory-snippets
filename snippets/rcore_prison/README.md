@@ -3,7 +3,7 @@ To use **one_inventory** with **rcore_prison**, follow these steps:
 
 2. Navigate to the following directory: `rcore_prison\modules\bridge\server\inventory`
 
-3. Place the **sv-ox_inventory file located inside modules\bridge\server\inventory** inside the `inventory` **modules\bridge\server\inventory** of the rcore_prison resource.
+3. Place the **sv-one_inventory file located inside modules\bridge\server\inventory** inside the `inventory` **modules\bridge\server\inventory** of the rcore_prison resource.
 
 4. Save the file and restart the resource.
 
