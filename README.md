@@ -37,6 +37,7 @@ See the repository license for details.
 
 
 
+what to know when there is a update on the snippets join GR-Scripts https://discord.gg/y6zJRUEhkT
 ## ⚠️ Disclaimer
 
 > I cannot test everything in all environments, so issues may occur depending on setup, versions, or integrations.
