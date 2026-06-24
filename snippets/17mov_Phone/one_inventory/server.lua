@@ -103,40 +103,22 @@ Inventory.GetItemWithMetadata = function(src, item, metadataKey, metadataValue, 
         Wait(100)
     end
 
-    for _, v in pairs(inventory) do
+    for k,v in pairs(inventory) do
         if v.name == item then
-            local metadata = v.metadata or {}
+            local metadata = v.metadata
 
-            if metadataKey and metadataValue == nil then
-                local foundItem = {
+            if (not metadataKey and not metadataValue) or (metadata and (metadata[metadataKey] == metadataValue or (metadataValue == "any" and metadata[metadataKey] ~= nil))) then
+                local item = {
                     name = v.name,
                     slot = v.slot,
-                    metadata = metadata
+                    metadata = v.metadata
                 }
 
                 if not getAllItems then
-                    return foundItem
+                    return item
                 end
 
-                matchedItems[#matchedItems + 1] = foundItem
-
-            elseif (not metadataKey and not metadataValue)
-                or (metadata and (
-                    metadata[metadataKey] == metadataValue
-                    or (metadataValue == "any" and metadata[metadataKey] ~= nil)
-                )) then
-
-                local foundItem = {
-                    name = v.name,
-                    slot = v.slot,
-                    metadata = metadata
-                }
-
-                if not getAllItems then
-                    return foundItem
-                end
-
-                matchedItems[#matchedItems + 1] = foundItem
+                matchedItems[#matchedItems+1] = item
             end
         end
     end
