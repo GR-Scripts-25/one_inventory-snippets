@@ -122,7 +122,7 @@ function AddItem(player, item, amount, metadata)
         return true
     end
 
-    if Config.Inventory == 'qs' then
+    if Config.Inventory == 'one' then
         exports.one_inventory:AddItem(GetSource(player), item, amount, metadata)
         return true
     end
