@@ -239,7 +239,7 @@ RegisterNetEvent('tk_policejob:openStorage', function(storageName, storageData)
         slots = storageData.slots or 100,
     })
 
-    elseif Config.inventory == 'one_inventory' then
+    if Config.inventory == 'one_inventory' then
         exports.one_inventory:OpenInventory(src, 'stash', {
             id = storageName,
             label = _U('stash'),
