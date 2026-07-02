@@ -30,10 +30,11 @@ See the repository license for details.
 | `okokshop` | 🟢 Tested & Working |
 | `kartik_mdtV2` | 🟢 Tested & Working | beta v2.0.4
 | `17mov_Phone` | 🟢 Tested & Working | 1.2.3
-| `luxu_admin` | 🟢 Tested & Working (trunk/glovebox not working) | 1.14.7
+| `luxu_admin` | 🟠 Tested & Working (trunk/glovebox not working) | 1.14.7
 | `tk_policejob` | 🟢 Tested & Working | 1.4.4
 | `p_bridge` | 🟢 Tested & Working | 1.2.9
 | `rcore_prison` | 🔴 Needs More Testing only works for auto-detect?? | 2.3.0
+| `visn_are` | 🔴 Needs Testing | 4a0c6ad3
 
 
 
