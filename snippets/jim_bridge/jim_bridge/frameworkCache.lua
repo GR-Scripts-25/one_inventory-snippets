@@ -13,6 +13,7 @@ local Exports = {
     OXCoreExport = "ox_core",
 
     OXInv = "ox_inventory",
+    OneInv = "one_inventory",
     QBInv = "qb-inventory",
     PSInv = "ps-inventory",
     CoreInv = "core_inventory",
@@ -20,7 +21,6 @@ local Exports = {
     OrigenInv = "origen_inventory",
     TgiannInv = "tgiann-inventory",
     JPRInv = "jpr-inventory",
-    OneInv = "one_inventory",
 
     OXLibExport = "ox_lib",
 
@@ -135,21 +135,16 @@ local itemFunc = {
     },
     {   script = Exports.OneInv,
         cacheItem = function()
-            local success, result = pcall(function()
-                return exports[Exports.OneInv]:GetItemDefinitions()
-            end)
-            if success and result and next(result) then
-                cache.Items = result
-            else
-                while not (cache.Items and next(cache.Items)) do
-                    Wait(1000)
-                    success, result = pcall(function()
-                        return exports[Exports.OneInv]:v()
-                    end)
-                    if success and result and next(result) then
-                        cache.Items = result
-                    end
+            local timeout = GetGameTimer() + 30000
+            while GetGameTimer() < timeout do
+                local success, result = pcall(function()
+                    return exports[Exports.OneInv]:GetAllItemDefinitions()
+                end)
+                if success and result and next(result) then
+                    cache.Items = result
+                    return
                 end
+                Wait(100)
             end
         end,
     },
@@ -184,10 +179,7 @@ local itemFunc = {
 
                 elseif GetResourceState(Exports.TgiannInv):find("start") then
                     itemResource = Exports.TgiannInv
-                    cache.Items = exports[Exports.OneInv]:Items()
-                elseif GetResourceState(Exports.OneInv):find("start") then
-                    itemResource = Exports.OneInv
-                    cache.Items = exports[Exports.OneInv]:GetItemDefinition()
+                    cache.Items = exports[Exports.TgiannInv]:Items()
                 end
             end
         end,
@@ -492,7 +484,35 @@ local invWeightTable = {
 
 -- Run config detection
 local invResource = ""
+
+local function loadOneInvConfig()
+    local ok, cfg = pcall(function()
+        return exports[Exports.OneInv]:GetClientConfig()
+    end)
+    if not ok or type(cfg) ~= "table" then return end
+
+    local weight = cfg.maxWeight
+        or (type(cfg.player) == "table" and cfg.player.maxWeight)
+        or (type(cfg.inventory) == "table" and cfg.inventory.maxWeight)
+        or (type(cfg.gameplay) == "table" and cfg.gameplay.maxWeight)
+
+    local slots = cfg.slots
+        or (type(cfg.player) == "table" and cfg.player.slots)
+        or (type(cfg.inventory) == "table" and cfg.inventory.slots)
+        or (type(cfg.gameplay) == "table" and cfg.gameplay.maxSlots)
+
+    if weight then cache.InventoryWeight = weight end
+    if slots then cache.InventorySlots = slots end
+end
+
+if checkExists(Exports.OneInv) then
+    waitStartedOrStopped(Exports.OneInv)
+    loadOneInvConfig()
+    invResource = Exports.OneInv:gsub("-", "^7-^4"):gsub("_", "^7_^4")
+end
+
 for script, data in pairs(invWeightTable) do
+    if invResource ~= "" then break end
     if checkExists(script) then
         if script == Exports.QBInv and GetResourceState(Exports.JPRInv):find("start") then goto skip end
 

@@ -10,16 +10,16 @@ OXLibExport, QBXExport, QBExport, ESXExport, OXCoreExport =
     Exports.ESXExport or "",
     Exports.OXCoreExport or ""
 
-OXInv, QBInv, PSInv, CoreInv, CodeMInv, OrigenInv, TgiannInv, JPRInv, OneInv =
+OXInv, OneInv, QBInv, PSInv, CoreInv, CodeMInv, OrigenInv, TgiannInv, JPRInv =
     Exports.OXInv or "",
+    Exports.OneInv or "",
     Exports.QBInv or "",
     Exports.PSInv or "",
     Exports.CoreInv or "",
     Exports.CodeMInv or "",
     Exports.OrigenInv or "",
     Exports.TgiannInv or "",
-    Exports.JPRInv or "",
-    Exports.OneInv or ""
+    Exports.JPRInv or ""
 
 RSGExport, RSGInv = Exports.RSGExport or "", Exports.RSGInv or ""
 VorpExport, VorpInv = Exports.VorpExport or "", Exports.VorpInv or ""
@@ -99,14 +99,6 @@ else
                         Items[k].image = (tempInfo.client.image) and tempInfo.client.image:gsub("nui://"..OXInv.."/web/images/", "") or Items[k].image
                         Items[k].hunger = tempInfo.client.hunger
                         Items[k].thirst = tempInfo.client.thirst
-                    end
-                end
-            elseif isStarted(OneInv) then
-                for k, v in pairs(Items) do
-                    local tempInfo = exports[OneInv]:GetItemDefinition(k)
-                    Items[k].image = k..".png" -- Set default image
-                    if tempInfo and tempInfo.image then
-                        Items[k].image = tempInfo.image
                     end
                 end
             end

@@ -14,8 +14,177 @@
 ]]
 validTokens = {}
 
+-- one_inventory: Jim scripts remove items themselves via removeItem().
+-- Disable auto-consume on bridge-registered usable items to prevent double removal.
+local oneInvUseableItems = {}
+local oneInvUseHookRegistered = false
+
+local function oneInvStashId(stashName)
+    return "stash:"..stashName
+end
+
+local function registerOneInvUseHook()
+    if oneInvUseHookRegistered or not isServer() or not isStarted(OneInv) then return end
+    oneInvUseHookRegistered = true
+    exports[OneInv]:RegisterHook('beforeItemUse', function(payload)
+        if oneInvUseableItems[payload.item] then
+            payload.consume = 0
+        end
+    end)
+    debugPrint("^6Bridge^7: ^2Registered ^3one_inventory^2 use hook for jim usable items^7")
+end
+
 -- Function Compatability Table
 local InvFunc = {
+    {   invName = OneInv,
+        removeItem =
+            function(src, item, remamount, slot)
+                exports[OneInv]:RemoveItem(src, item, remamount, nil, slot)
+            end,
+        addItem =
+            function(src, item, amountToAdd, info, slot)
+                exports[OneInv]:AddItem(src, item, amountToAdd, info, slot)
+            end,
+        setItemMetadata =
+            function(data, src)
+                exports[OneInv]:SetItemMetadata(src, data.slot, data.metadata)
+            end,
+        hasItem =
+            function(item, amount, src)
+                if src then
+                    local serverItemCheck = exports[OneInv]:GetItemCount(src, item) or 0
+                    return serverItemCheck >= amount, serverItemCheck
+                else
+                    local localItemCheck = exports[OneInv]:GetItemCount(item) or 0
+                    return localItemCheck >= amount, localItemCheck
+                end
+            end,
+        canCarry =
+            function(itemTable, src)
+                local resultTable = {}
+                for k, v in pairs(itemTable) do
+                    resultTable[k] = exports[OneInv]:CanCarryItem(src, k, v)
+                end
+                return resultTable
+            end,
+        getMaxInvWeight =
+            function()
+                if not isServer() then
+                    return exports[OneInv]:GetMaxWeight()
+                end
+                local ok, cfg = pcall(function()
+                    return exports[OneInv]:GetClientConfig()
+                end)
+                if ok and type(cfg) == "table" then
+                    return cfg.maxWeight
+                        or (type(cfg.player) == "table" and cfg.player.maxWeight)
+                        or (type(cfg.inventory) == "table" and cfg.inventory.maxWeight)
+                        or InventoryWeight
+                end
+                return InventoryWeight
+            end,
+        getCurrentInvWeight =
+            function(src)
+                if src then
+                    return exports[OneInv]:GetWeightHolding(src) or 0
+                end
+                return exports[OneInv]:GetWeightHolding() or 0
+            end,
+        getPlayerInv =
+            function(src)
+                local grabInv = src and exports[OneInv]:GetInventoryItems(src) or exports[OneInv]:GetInventoryItems()
+                local normalized = {}
+                for _, v in pairs(grabInv or {}) do
+                    normalized[#normalized + 1] = {
+                        name = v.name,
+                        amount = v.count,
+                        count = v.count,
+                        slot = v.slot,
+                        weight = v.weight,
+                        metadata = v.metadata,
+                        info = v.metadata,
+                        label = v.label,
+                    }
+                end
+                return normalized
+            end,
+        invImg =
+            function(item)
+                return "nui://"..OneInv.."/web/images/"..(Items[item].image or item..".png")
+            end,
+        openShop =
+            function(name, label, items)
+                exports[OneInv]:OpenInventory('shop', name)
+            end,
+        serverOpenShop =
+            function(shopName)
+                exports[OneInv]:OpenInventory(source, 'shop', shopName)
+            end,
+        registerShop =
+            function(name, label, items, society)
+                local shopItems = {}
+                for i = 1, #items do
+                    local entry = items[i]
+                    shopItems[#shopItems + 1] = {
+                        name = entry.name,
+                        price = entry.price,
+                        count = entry.amount or entry.count or 0,
+                        metadata = entry.info or entry.metadata,
+                    }
+                end
+                exports[OneInv]:RegisterShop({
+                    name = name,
+                    label = label,
+                    inventory = shopItems,
+                })
+            end,
+        openStash =
+            function(data)
+                exports[OneInv]:OpenInventory('stash', {
+                    id = data.stash,
+                    label = data.label,
+                    slots = data.slots or 50,
+                    maxWeight = data.maxWeight or 600000,
+                })
+            end,
+        clearStash =
+            function(stashId)
+                exports[OneInv]:ClearInventory(oneInvStashId(stashId))
+            end,
+        getStash =
+            function(stashName)
+                return exports[OneInv]:GetInventoryItems(oneInvStashId(stashName)) or {}
+            end,
+        stashEditMetadata =
+            function(stash, slot, metadata)
+                exports[OneInv]:SetItemMetadata(oneInvStashId(stash), slot, metadata)
+            end,
+        stashAddItem =
+            function(stashItems, stashName, items)
+                for k, v in pairs(items) do
+                    for _, name in pairs(stashName) do
+                        exports[OneInv]:AddItem(oneInvStashId(name), k, v)
+                    end
+                end
+            end,
+        stashRemoveItem =
+            function(stashItems, stashName, items)
+                for k, v in pairs(items) do
+                    for _, name in pairs(stashName) do
+                        local success = exports[OneInv]:RemoveItem(oneInvStashId(name), k, v)
+                        if success then
+                            debugPrint("^6Bridge^7: ^2Removing ^3"..OneInv.." ^2Stash item^7:", k, v)
+                            break
+                        end
+                    end
+                end
+            end,
+        registerStash =
+            function(name, label, slots, weight, owner, coords)
+                -- Stashes auto-create when opened through one_inventory.
+            end,
+    },
+
     {   invName = OXInv,
         removeItem =
             function(src, item, remamount)
@@ -1277,108 +1446,6 @@ local InvFunc = {
                 --
             end,
     },
-
-    {   invName = OneInv,
-            removeItem =
-                function(src, item, remamount)
-                    exports[OneInv]:RemoveItem(src, item, remamount, nil)
-                end,
-            addItem =
-                function(src, item, amountToAdd, info, slot)
-                    exports[OneInv]:AddItem(src, item, amountToAdd, info, slot)
-                end,
-            setItemMetadata =
-                function(data, src)
-                    exports[OneInv]:SetItemMetadata(src, data.slot, data.metadata)
-                end,
-            hasItem =
-                function(item, amount, src)
-                    if src then
-                        local serverItemCheck = exports[OneInv]:GetItemCount(src, item) or 0
-                        return serverItemCheck >= amount, serverItemCheck
-                    else
-                        local localItemCheck = exports[OneInv]:GetItemCount(item) or 0
-                        return localItemCheck >= amount, localItemCheck
-                    end
-                end,
-            canCarry =
-                function(itemTable, src)
-                    local resultTable = {}
-                    for k, v in pairs(itemTable) do
-                        resultTable[k] = exports[OneInv]:CanCarryItem(src, k, v)
-                    end
-                    return resultTable
-                end,
-            getMaxInvWeight =
-                function()
-                    return InventoryWeight
-                end,
-            getCurrentInvWeight =
-                function(src)
-                    return exports[OneInv]:GetWeightHolding(src or source)
-                end,
-            getPlayerInv =
-                function(src)
-                    return exports[OneInv]:GetInventoryItems(src or source)
-                end,
-            invImg =
-                function(item)
-                    return "nui://"..OneInv.."/html/images/"..(Items[item].image or "")
-                end,
-            openShop =
-                function(name, label, items)
-                    exports[OneInv]:OpenInventory('shop', name)
-                end,
-            serverOpenShop = function(shopName)
-                exports[OneInv]:OpenInventory(source, 'shop', shopName)
-            end,
-            registerShop =
-                function(name, label, items, society)
-                    exports[OneInv]:RegisterShop({
-                        name = name,
-                        label = label,
-                        inventory = items,
-                        jobs = society,
-                    })
-                end,
-            openStash =
-                function(data)
-                    exports[OneInv]:OpenInventory('stash', { id = data.stash, label = data.label, slots = data.slots, maxWeight = data.maxWeight })
-                end,
-            clearStash =
-                function(stashId)
-                    exports[OneInv]:ClearInventory('stash:'..stashId)
-                end,
-            getStash =
-                function(stashName)
-                    local stash = exports[OneInv]:GetInventoryItems('stash:'..stashName)
-                    return type(stash) == "table" and stash or {}
-                end,
-            stashEditMetadata =
-                function(stash, slot, metadata)
-                    exports[OneInv]:SetItemMetadata(stash, slot, metadata)
-                end,
-            stashAddItem =
-                function(stashItems, stashName, items)
-
-                end,
-            stashRemoveItem =
-                function(stashItems, stashName, items)
-                    for k, v in pairs(items) do
-                        for _, name in pairs(stashName) do
-                            local success = exports[OneInv]:RemoveItem('stash:'..name, k, v)
-                            if success then
-                                debugPrint("^6Bridge^7: ^2Removing ^3"..OneInv.." ^2Stash item^7:", k, v)
-                                break
-                            end
-                        end
-                    end
-                end,
-            registerStash =
-                function(name, label, slots, weight, owner, coords)
-                    -- Auto-created
-                end,
-    },
 }
 
 -------------------------------------------------------------
@@ -1399,6 +1466,9 @@ function lockInv(toggle)
     FreezeEntityPosition(PlayerPedId(), toggle)
     LocalPlayer.state:set("inv_busy", toggle, true)
     LocalPlayer.state:set("invBusy", toggle, true)
+    if isStarted(OneInv) then
+        exports[OneInv]:SetCanOpenInventory(not toggle)
+    end
     TriggerEvent('inventory:client:busy:status', toggle)
     TriggerEvent('canUseInventoryAndHotbar:toggle', not toggle)
 end
@@ -1591,6 +1661,11 @@ end
 --- ```
 function createUseableItem(item, funct)
     if doesItemExist(item) then
+        if isStarted(OneInv) then
+            oneInvUseableItems[item] = true
+            registerOneInvUseHook()
+        end
+
         local useableFunc = {
             {   framework = ESXExport,
                 func = function(item, funct)
@@ -1763,6 +1838,10 @@ RegisterNetEvent(getScript()..":server:toggleItem", function(give, item, amount,
             return
         end
         if not hasItem(item, amount or 1, src) then
+            if isStarted(OneInv) and oneInvUseableItems[item] then
+                debugPrint("^6Bridge^7: ^3Item already consumed by one_inventory^7: ^3"..item.."^7")
+                return
+            end
             dupeWarn(src, item, amount)
 
         else
@@ -1770,7 +1849,7 @@ RegisterNetEvent(getScript()..":server:toggleItem", function(give, item, amount,
                 local inv = InvFunc[i]
                 if isStarted(inv.invName) then
                     invName = inv.invName
-                    inv.removeItem(src, item, remamount)
+                    inv.removeItem(src, item, remamount, slot)
                     break
                 end
             end
@@ -2424,6 +2503,14 @@ RegisterNetEvent(getScript()..":server:openServerStash", function(data)
     if isStarted(TgiannInv) then
         exports[TgiannInv]:OpenInventory(source, 'stash', data.stashName, data)
 
+    elseif isStarted(OneInv) then
+        exports[OneInv]:OpenInventory(source, 'stash', {
+            id = data.stashName,
+            label = data.label,
+            slots = data.slots or 40,
+            maxWeight = data.maxweight or data.maxWeight or 600000,
+        })
+
     elseif isStarted(JPRInv) then
         exports[JPRInv]:OpenInventory(source, data.stashName, data)
 
@@ -2712,8 +2799,8 @@ RegisterNetEvent(getScript()..":openGrabBox", function(data, stashData)
     local Ped = PlayerPedId()
 	local id = data.metadata and data.metadata.id or data.info and data.info.id or ""
 
-    if isStarted(OXInv) then
-        -- this SHOLD be handled within ox_inventory if set up right
+    if isStarted(OXInv) or isStarted(OneInv) then
+        -- this SHOLD be handled within ox_inventory / one_inventory if set up right
         return
     end
 
