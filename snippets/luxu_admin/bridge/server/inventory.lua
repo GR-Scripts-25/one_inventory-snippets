@@ -417,40 +417,30 @@ function inventory.getStash(typeofStash, id)
             return items
         end
     elseif isResourceRunning("jaksam_inventory") then
+        local invId = id
         if typeofStash == "trunk" or typeofStash == "glovebox" then
-            return exports['jaksam_inventory']:getInventoryIdFromPlate(id, typeofStash)
-        else
-            return exports['jaksam_inventory']:getInventory(id)
-        end
-    elseif isResourceRunning("core_inventory") then
-        return exports.core_inventory:getInventory("stash-" .. id)
-    elseif isResourceRunning("one_inventory") then
-        local invIdentifier
-        if typeofStash == "stash" then
-            invIdentifier = "stash:" .. id
-        elseif typeofStash == "trunk" then
-            invIdentifier = "trunk:" .. id
-        elseif typeofStash == "glovebox" then
-            invIdentifier = "glovebox:" .. id
-        else
-            return {}
+            invId = exports['jaksam_inventory']:getInventoryIdFromPlate(id, typeofStash)
+            if not invId then return {} end
         end
 
-        local inventoryData = exports.one_inventory:GetInventory(invIdentifier)
-        if not inventoryData or not inventoryData.slots then
-            return {}
-        end
+        local jaksamInventory = exports['jaksam_inventory']:getInventory(invId)
+        if not jaksamInventory or type(jaksamInventory.items) ~= "table" then return {} end
 
         local items = {}
-        for _, slot in ipairs(inventoryData.slots) do
-            table.insert(items, {
-                name = slot.name,
-                count = slot.count,
-                metadata = slot.metadata or {},
-                slot = slot.slot
-            })
+        for slotKey, item in pairs(jaksamInventory.items) do
+            if type(item) == "table" and item.name then
+                items[#items + 1] = {
+                    name = item.name,
+                    amount = item.amount,
+                    slot = tonumber(item.slot) or tonumber(tostring(slotKey):match("%d+")),
+                    metadata = item.metadata,
+                }
+            end
         end
+
         return items
+    elseif isResourceRunning("core_inventory") then
+        return exports.core_inventory:getInventory("stash-" .. id)
     end
     return {}
 end

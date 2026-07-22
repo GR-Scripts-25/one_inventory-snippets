@@ -290,6 +290,22 @@ end
 ---@param playerObj table
 ---@return {name:string, label:string, grade: {name:string, level:number, isboss:boolean}} | nil
 function player.getGang(playerObj)
+    if GetResourceState("op-crime") == "started" then
+        local gangName = Player(playerObj.PlayerData.source).state.gangName
+        local gangId = Player(playerObj.PlayerData.source).state.gangId
+        local rank = Player(playerObj.PlayerData.source).state.gangRankName
+        return {
+            name = gangId,
+            label = gangName,
+            grade = {
+                name = rank,
+                level = rank,
+                isboss = false,
+            },
+        }
+    end
+
+
     if Framework.name == 'esx' then
         return nil -- ESX uses jobs for gangs
     elseif Framework.name == 'qb' or Framework.name == 'qbx' then
@@ -373,11 +389,8 @@ end
 
 function player.openClothingMenu(source)
     if GetResourceState("17mov_CharacterSystem") == "started" then
-        if Framework.name == "esx" then
-            TriggerClientEvent("esx_skin:openSaveableMenu", source)
-        else
-            TriggerClientEvent("qb-clothing:client:openMenuCommand", source)
-        end
+        TriggerClientEvent("esx_skin:openSaveableMenu", source)
+        TriggerClientEvent("qb-clothing:client:openMenuCommand", source)
     elseif GetResourceState('illenium-appearance') == "started" then
         TriggerClientEvent("illenium-appearance:client:openClothingShop", source, true)
     elseif GetResourceState('vms_clothestore') == "started" then
@@ -401,6 +414,12 @@ function player.openClothingMenu(source)
         TriggerClientEvent("qb-clothing:client:openMenu", source)
     elseif GetResourceState("0r-clothingv2") == "started" then
         TriggerClientEvent('0r-clothing:openCharacterCreationMenu', source, true, true)
+    elseif GetResourceState("um-clothing") == "started" then
+        if Framework.name == "esx" then
+            TriggerClientEvent("esx_skin:openSaveableMenu", source)
+        else
+            TriggerClientEvent("qb-clothing:client:openMenu", source)
+        end
     end
 end
 
